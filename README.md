@@ -1,65 +1,69 @@
 # MiniMax H3 ComfyUI — Runpod Serverless
 
-Custom Runpod Serverless worker for the included DaSiWa MiniMax H3 8Turbo
-ComfyUI workflow. The Docker build installs all custom nodes and downloads the
-active model set into the exact directories expected by the workflow.
+This repository builds a custom-node worker. Large model weights live on a
+persistent Runpod Network Volume so the GitHub build stays small and fast.
 
-## Deploy from GitHub
+## 1. Populate the Network Volume
 
-1. In Runpod, open **Settings → Connections → GitHub** and authorize this repo.
-2. Open **Serverless → New Endpoint → Import Git Repository**.
-3. Select this repository, branch `main`, and Dockerfile path `Dockerfile`.
-4. Choose a Queue endpoint and a GPU with enough VRAM for MiniMax H3.
-5. Set a suitably long execution timeout for video generation, then deploy.
+Create a Network Volume of at least **60 GB** (100 GB recommended) in the same
+datacenter as the endpoint. Attach it temporarily to a Runpod Pod, open that
+Pod's terminal, and run:
 
-Runpod builds and stores the image. Do not use the ComfyUI-to-API Wizard for
-this repo—the Dockerfile already resolves the model and custom-node sources.
-
-## Request format
-
-The official worker expects a ComfyUI **API-format** workflow:
-
-```json
-{
-  "input": {
-    "workflow": {}
-  }
-}
+```bash
+git clone https://github.com/korotoshi/MiniMaxVideoGeneration.git
+cd MiniMaxVideoGeneration
+bash scripts/populate-network-volume.sh /workspace
 ```
 
-The included JSON is the editable UI workflow. Load it in ComfyUI, then choose
-**Workflow → Export (API)** and put that exported object in `input.workflow`.
-Images and other input media can be supplied using the worker's `input.images`
-array.
+This repository is private, so authenticate GitHub in the temporary Pod before
+cloning it. Alternatively, upload `scripts/populate-network-volume.sh` to the
+Pod and run it there.
 
-## Included active models
+The script resumes interrupted downloads and verifies all seven files using
+their published SHA-256 checksums. Terminate the temporary Pod after it reports
+success; this does not delete the Network Volume.
+
+## 2. Deploy from GitHub
+
+1. Connect GitHub under Runpod **Settings → Connections**.
+2. Choose **Serverless → New Endpoint → Import Git Repository**.
+3. Select `korotoshi/MiniMaxVideoGeneration`, branch `main`, and `Dockerfile`.
+4. Choose a Queue endpoint and a GPU with sufficient VRAM for MiniMax H3.
+5. Under **Advanced → Select Network Volume**, attach the populated volume.
+6. Set a long video-generation timeout and deploy.
+
+The official worker automatically scans `/runpod-volume/models/...`. No custom
+symlinks are needed. Temporarily set `NETWORK_VOLUME_DEBUG=true` on the endpoint
+if models are not detected.
+
+## API request
+
+The worker expects a ComfyUI API-format workflow:
+
+```json
+{"input":{"workflow":{}}}
+```
+
+The included JSON is the editable UI workflow. Load it in ComfyUI and choose
+**Workflow → Export (API)**, then submit that exported object as
+`input.workflow`.
+
+## Installed models
 
 - DaSiWa MiniMax H3 Hybrid 8Turbo v1 INT8
-- Qwen3-VL 32B MiniMax H3 INT4 ConvRot text encoder
-- MiniMax H3 video VAE INT8
+- Qwen3-VL 32B MiniMax H3 INT4 ConvRot
+- MiniMax H3 video VAE INT8 and FP16
 - MiniMax H3 audio VAE FP32
-- MiniMax H3 video VAE FP16
 - MiniMax H3 TAE preview model
-- RIFE 4.26 frame interpolation
+- RIFE 4.26 interpolation
 
-Exact URLs and known SHA-256 values are recorded in `model-sources.json`.
+URLs and SHA-256 values are recorded in `model-sources.json`. Disabled original
+FL2VA/REF2VA and upscaler branches are not installed; keep them disabled unless
+you add their models to the volume.
 
-## Deliberately excluded optional weights
+Runpod's GitHub builder limits Docker builds to 30 minutes and images to 80 GB.
+Keeping roughly 44 GB of weights on the volume avoids both limits.
 
-The workflow contains disabled branches for the original FL2VA/REF2VA models,
-latent upscaling, and AnimeSharp upscaling. Those weights are not baked into
-the image because Runpod's GitHub integration limits images to 80 GB. Keep
-those stages disabled unless you later put their weights on a Runpod Network
-Volume.
-
-## Important build limits
-
-Runpod currently gives GitHub Docker builds 30 minutes and limits the final
-image to 80 GB. The initial build downloads tens of gigabytes. If it exceeds
-the build timeout, use the same Dockerfile with an external container builder
-and deploy the resulting registry image, or move models to a Network Volume.
-
-References: [Runpod GitHub deployment](https://docs.runpod.io/serverless/workers/github-integration),
-[official ComfyUI worker](https://github.com/runpod-workers/worker-comfyui), and
-[worker customization](https://github.com/runpod-workers/worker-comfyui/blob/main/docs/customization.md).
-
+References: [GitHub deployment](https://docs.runpod.io/serverless/workers/github-integration),
+[network-volume paths](https://github.com/runpod-workers/worker-comfyui/blob/main/docs/network-volumes.md),
+and [official ComfyUI worker](https://github.com/runpod-workers/worker-comfyui).
