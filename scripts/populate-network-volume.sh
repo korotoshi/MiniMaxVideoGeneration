@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-volume_root="${1:-/workspace}"
+if [[ $# -ge 1 ]]; then
+  volume_root="$1"
+elif [[ -d "${PWD}/models" ]]; then
+  volume_root="${PWD}"
+else
+  volume_root="/workspace"
+fi
 models_root="${volume_root}/models"
 
 if [[ ! -d "${volume_root}" ]]; then
@@ -41,6 +47,21 @@ download_model "text_encoders" \
   "qwen3vl_32b_minimax_h3_int4_convrot.safetensors" \
   "21fd2e2f06bc4fc422c6aa20893fe189edbbd9ab3068215f96e7a6cf2f6cb5bb" \
   "https://huggingface.co/Abiray/MiniMax-H3-GGUF/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_int4_convrot.safetensors?download=true"
+
+download_model "text_encoders" \
+  "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors" \
+  "11f22a7e0dc2f6d00782faec7aba0128b49ff241f788988a7aeff7973ce903cf" \
+  "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors?download=true"
+
+download_model "diffusion_models/MiniMaxH3" \
+  "minimax_h3_fl2va_pruned_int8_convrot.safetensors" \
+  "e889202c41dafb67b10d67b97f0d8541508036a6090af23425a5c2615d03c47a" \
+  "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors?download=true"
+
+download_model "diffusion_models/MiniMaxH3" \
+  "minimax_h3_ref2va_pruned_int8_convrot.safetensors" \
+  "9255f52b6677845ad238f20dfaafa94727053694127ab7f255c048f0f9365779" \
+  "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors?download=true"
 
 download_model "vae/MiniMaxH3" \
   "minimax_h3_video_vae_int8_convrot.safetensors" \
