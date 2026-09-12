@@ -121,7 +121,7 @@ queue_download "diffusion_models/MiniMaxH3" \
 
 queue_download "vae/MiniMaxH3" \
   "minimax_h3_video_vae_int8_convrot.safetensors" \
-  "9bb2d96f218c76babd85e0611b85ca8fb330a90546c01a0005e8a58a59593410a" \
+  "9bb2d96f218c76babd85e0611b85ca8fb330a90546c01a0005e8a58a59593410" \
   "https://huggingface.co/Kijai/MiniMax-H3-experimental/resolve/main/minimax_h3_video_vae_int8_convrot.safetensors?download=true"
 
 queue_download "vae/MiniMaxH3" \
