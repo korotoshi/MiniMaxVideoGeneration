@@ -106,7 +106,7 @@ queue_download "text_encoders" \
 
 queue_download "text_encoders" \
   "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors" \
-  "11f22a7e0dc2f6d00782faec7aba0128b49ff241f788988a7aeff7973ce903cf" \
+  "35a88d51044231fe332301d7a62aa81e3f2cba62febeb446e2c1e3e0ef76f2c6" \
   "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors?download=true"
 
 queue_download "diffusion_models/MiniMaxH3" \
