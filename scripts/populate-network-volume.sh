@@ -32,13 +32,37 @@ download_model() {
   fi
 
   echo "Downloading ${filename}"
-  curl --fail --location --retry 8 --retry-all-errors \
-    --continue-at - --output "${partial}" "${url}"
+  if command -v aria2c >/dev/null 2>&1; then
+    aria2c \
+      --allow-overwrite=true \
+      --auto-file-renaming=false \
+      --check-certificate=true \
+      --console-log-level=warn \
+      --continue=true \
+      --dir="$(dirname "${partial}")" \
+      --file-allocation=none \
+      --max-connection-per-server="${ARIA2_CONNECTIONS:-8}" \
+      --max-tries=10 \
+      --min-split-size=16M \
+      --out="$(basename "${partial}")" \
+      --retry-wait=3 \
+      --split="${ARIA2_CONNECTIONS:-8}" \
+      --summary-interval=10 \
+      "${url}"
+  else
+    curl --fail --location --retry 8 --retry-all-errors \
+      --continue-at - --output "${partial}" "${url}"
+  fi
   echo "${sha256}  ${partial}" | sha256sum --check
   mv "${partial}" "${destination}"
 }
 
-max_parallel="${MAX_PARALLEL_DOWNLOADS:-3}"
+if command -v aria2c >/dev/null 2>&1; then
+  default_parallel=2
+else
+  default_parallel=3
+fi
+max_parallel="${MAX_PARALLEL_DOWNLOADS:-${default_parallel}}"
 if ! [[ "${max_parallel}" =~ ^[1-9][0-9]*$ ]]; then
   echo "MAX_PARALLEL_DOWNLOADS must be a positive integer" >&2
   exit 1
@@ -63,7 +87,12 @@ queue_download() {
   fi
 }
 
-echo "Downloading with up to ${max_parallel} parallel transfers"
+if command -v aria2c >/dev/null 2>&1; then
+  echo "Fast downloader: aria2 (${ARIA2_CONNECTIONS:-8} connections per file)"
+else
+  echo "Downloader: curl (install aria2 for multi-connection downloads)"
+fi
+echo "Downloading up to ${max_parallel} model files concurrently"
 
 queue_download "diffusion_models/MiniMaxH3" \
   "DasiwaMinimaxH3_dasiwaHybrid8turboV1.safetensors" \

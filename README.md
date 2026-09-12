@@ -23,10 +23,12 @@ The script resumes interrupted downloads and verifies all ten files using
 their published SHA-256 checksums. Terminate the temporary Pod after it reports
 success; this does not delete the Network Volume.
 
-Downloads run three at a time by default. Override the concurrency when needed:
+The all-in-one VM setup installs `aria2`. Downloads then use eight HTTP range
+connections per model and two model files concurrently. Override either value:
 
 ```bash
-MAX_PARALLEL_DOWNLOADS=2 bash scripts/populate-network-volume.sh /workspace
+ARIA2_CONNECTIONS=8 MAX_PARALLEL_DOWNLOADS=2 \
+  bash scripts/populate-network-volume.sh /workspace
 ```
 
 For a normal Massed Compute ComfyUI VM, open a terminal in the ComfyUI folder

@@ -25,6 +25,12 @@ if [[ -f "${HOME}/.env" ]]; then
   set +a
 fi
 
+if ! command -v aria2c >/dev/null 2>&1; then
+  echo "Installing aria2 for accelerated multi-connection model downloads"
+  sudo apt-get update
+  sudo apt-get install -y aria2
+fi
+
 if [[ -x "${comfy_root}/.venv/bin/python" ]]; then
   comfy_python="${comfy_root}/.venv/bin/python"
 elif [[ -x "${comfy_root}/venv/bin/python" ]]; then
