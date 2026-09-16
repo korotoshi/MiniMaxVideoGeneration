@@ -31,13 +31,18 @@ if ! command -v aria2c >/dev/null 2>&1; then
   sudo apt-get install -y aria2
 fi
 
-if [[ -x "${comfy_root}/.venv/bin/python" ]]; then
+if [[ -n "${COMFYUI_PYTHON:-}" ]]; then
+  comfy_python="${COMFYUI_PYTHON}"
+elif [[ -x "${comfy_root}/.venv/bin/python" ]]; then
   comfy_python="${comfy_root}/.venv/bin/python"
 elif [[ -x "${comfy_root}/venv/bin/python" ]]; then
   comfy_python="${comfy_root}/venv/bin/python"
+elif [[ -x "${HOME}/miniconda3/envs/comfyui/bin/python" ]]; then
+  comfy_python="${HOME}/miniconda3/envs/comfyui/bin/python"
 else
   comfy_python="$(command -v python3 || command -v python)"
 fi
+echo "Installing custom-node dependencies with ${comfy_python} ($("${comfy_python}" --version 2>&1))"
 
 install_node() {
   local repo_url="$1"
@@ -55,7 +60,21 @@ install_node() {
   fi
 
   if [[ -f "${destination}/requirements.txt" ]]; then
-    "${comfy_python}" -m pip install -r "${destination}/requirements.txt"
+    if [[ "${directory}" == "ComfyUI-DaSiWa-Nodes" ]] && \
+       "${comfy_python}" -c 'import sys; sys.exit(0 if sys.version_info < (3, 11) else 1)' && \
+       grep -Eq '^av>=18([.]0)?$' "${destination}/requirements.txt"; then
+      echo "Python <3.11 cannot install PyAV 18; using PyAV 17.1 for DaSiWa (compatibility workaround)"
+      local compatible_requirements
+      compatible_requirements="$(mktemp)"
+      sed -E 's/^av>=18([.]0)?$/av==17.1.0/' "${destination}/requirements.txt" > "${compatible_requirements}"
+      if ! "${comfy_python}" -m pip install -r "${compatible_requirements}"; then
+        rm -f "${compatible_requirements}"
+        return 1
+      fi
+      rm -f "${compatible_requirements}"
+    else
+      "${comfy_python}" -m pip install -r "${destination}/requirements.txt"
+    fi
   fi
 }
 
