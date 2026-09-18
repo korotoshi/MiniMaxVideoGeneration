@@ -1,6 +1,34 @@
 {
   "models": [
     {
+      "filename": "minimax_h3_fl2va_int8_convrot.safetensors",
+      "path": "models/diffusion_models/MiniMaxH3",
+      "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_fl2va_int8_convrot.safetensors?download=true",
+      "sha256": "7ad4c73e6e378b822ffd1629f27f632d3787d95f5e468e3af958f98c58df96a5",
+      "profile": "quality"
+    },
+    {
+      "filename": "DasiwaMinimaxH3_dasiwaHybridV2_int8.safetensors",
+      "path": "models/diffusion_models/MiniMaxH3",
+      "url": "https://civitai.com/api/download/models/3314675?format=SafeTensor&fp=int8&type=Model",
+      "sha256": ["dc1c77de0435901cb07dc6736493317f059a53fbdd2d363d1710cebfbb2844e7", "4cb8e1eaa9c3e5c664822760890bcbe6078455401cfa43205baf322e856d25f8"],
+      "profile": "quality"
+    },
+    {
+      "filename": "qwen3vl_32b_minimax_h3_bf16.safetensors",
+      "path": "models/text_encoders",
+      "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors?download=true",
+      "sha256": "600d567f6a9629c8574e8e7041b199bdd9c59a986afa7906910a81919610607d",
+      "profile": "quality"
+    },
+    {
+      "filename": "minimax_h3_latent_upscaler_3d_bf16.safetensors",
+      "path": "models/latent_upscale_models",
+      "url": "https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler/resolve/09592c6221ec95cc8e0fae67842e34926c4e668b/minimax_h3_latent_upscaler_3d_bf16.safetensors?download=true",
+      "sha256": "4f57821f5837f32f7142b67d815606dbd7550f194e5c769f7d6c3f83b146a5e6",
+      "profile": "quality"
+    },
+    {
       "filename": "DasiwaMinimaxH3_dasiwaHybrid8turboV1.safetensors",
       "path": "models/diffusion_models/MiniMaxH3",
       "url": "https://huggingface.co/brurpo/DaSiWa-MiniMax-H3-Hybrid/resolve/main/DasiwaMinimaxH3_dasiwaHybrid8turboV1.safetensors?download=true",

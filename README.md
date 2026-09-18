@@ -5,7 +5,8 @@ persistent Runpod Network Volume so the GitHub build stays small and fast.
 
 ## 1. Populate the Network Volume
 
-Create a Network Volume of at least **150 GB** (200 GB recommended) in the same
+Create a Network Volume of at least **150 GB** for the quality profile (200 GB
+recommended, or more if keeping the old turbo weights too) in the same
 datacenter as the endpoint. Attach it temporarily to a Runpod Pod, open that
 Pod's terminal, and run:
 
@@ -19,8 +20,9 @@ This repository is private, so authenticate GitHub in the temporary Pod before
 cloning it. Alternatively, upload `scripts/populate-network-volume.sh` to the
 Pod and run it there.
 
-The script resumes interrupted downloads and verifies all ten files using
-their published SHA-256 checksums. Terminate the temporary Pod after it reports
+The script defaults to the **quality** profile shown below, resumes interrupted
+downloads, and verifies SHA-256 checksums. Set `CIVITAIKEY` (or
+`CIVITAI_API_KEY`) if CivitAI requires authentication. Terminate the temporary Pod after it reports
 success; this does not delete the Network Volume.
 
 The all-in-one VM setup installs `aria2`. Downloads then use eight HTTP range
@@ -39,7 +41,9 @@ bash /path/to/MiniMaxVideoGeneration/scripts/setup-vm.sh
 ```
 
 It installs or updates all custom nodes, installs their Python requirements,
-and downloads every model. Existing verified models are skipped.
+and downloads the quality-profile models. Existing verified models are skipped.
+To restore the previous fast setup instead, use `MODEL_PROFILE=turbo` before
+either download command. The two profiles can coexist on a volume.
 
 ## 2. Deploy from GitHub
 
@@ -66,7 +70,27 @@ The included JSON is the editable UI workflow. Load it in ComfyUI and choose
 **Workflow → Export (API)**, then submit that exported object as
 `input.workflow`.
 
-## Installed models
+## Quality-profile models (default)
+
+- Original MiniMax H3 FL2VA full INT8 ConvRot (34 GB)
+- DaSiWa Hybrid V2 non-turbo INT8 (19.53 GB; CivitAI)
+- Qwen3-VL 32B MiniMax H3 BF16 (51.5 GB)
+- MiniMax H3 video VAE FP16 and audio VAE FP32
+- MiniMax H3 3D BF16 latent upscaler (691 MB)
+- MiniMax H3 TAE preview model and RIFE 4.26 interpolation
+
+In the workflow's Settings node select those exact filenames, use the
+non-turbo sampler (`res_multistep` / `simple`) with 20–25 steps and video/audio
+shifts around 10–12 / 3–5. The bundled editable workflow still has its original
+turbo defaults; loading it does **not** automatically switch settings.
+The latent 2x stage remains optional and may need its spatial-split settings
+refreshed if the installed node version rejects the old workflow values.
+
+The CivitAI V2 listing has two same-named INT8 uploads with different hashes;
+the downloader accepts only those two published hashes, and reports which one
+was received. A checksum mismatch stops the setup.
+
+## Turbo-profile models (`MODEL_PROFILE=turbo`)
 
 - DaSiWa MiniMax H3 Hybrid 8Turbo v1 INT8
 - Qwen3-VL 32B MiniMax H3 INT4 ConvRot
@@ -78,12 +102,11 @@ The included JSON is the editable UI workflow. Load it in ComfyUI and choose
 - MiniMax H3 TAE preview model
 - RIFE 4.26 interpolation
 
-URLs and SHA-256 values are recorded in `model-sources.json`. Optional latent
-and AnimeSharp upscaler weights are not installed; keep those stages disabled
-unless you add their models to the volume.
+URLs and SHA-256 values are recorded in `model-sources.json`. The AnimeSharp
+upscaler weight is not installed; keep that stage disabled unless you add it.
 
 Runpod's GitHub builder limits Docker builds to 30 minutes and images to 80 GB.
-Keeping roughly 115 GB of weights on the volume avoids both limits.
+Keeping model weights on the volume avoids both limits.
 
 References: [GitHub deployment](https://docs.runpod.io/serverless/workers/github-integration),
 [network-volume paths](https://github.com/runpod-workers/worker-comfyui/blob/main/docs/network-volumes.md),

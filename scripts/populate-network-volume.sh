@@ -9,6 +9,11 @@ else
   volume_root="/workspace"
 fi
 models_root="${volume_root}/models"
+model_profile="${MODEL_PROFILE:-quality}"
+if [[ "${model_profile}" != "quality" && "${model_profile}" != "turbo" ]]; then
+  echo "MODEL_PROFILE must be quality or turbo" >&2
+  exit 1
+fi
 
 if [[ ! -d "${volume_root}" ]]; then
   echo "Volume mount does not exist: ${volume_root}" >&2
@@ -22,18 +27,26 @@ download_model() {
   local url="$4"
   local destination="${models_root}/${relative_path}/${filename}"
   local partial="${destination}.part"
+  local actual_hash
 
   mkdir -p "$(dirname "${destination}")"
 
   if [[ -f "${destination}" ]] && \
-     echo "${sha256}  ${destination}" | sha256sum --check --status; then
+     [[ ",${sha256}," == *",$(sha256sum "${destination}" | cut -d ' ' -f 1),"* ]]; then
     echo "Already verified: ${destination}"
     return
   fi
 
   echo "Downloading ${filename}"
+  local auth_args=()
+  if [[ "${url}" == https://civitai.com/* || "${url}" == https://civitai.red/* ]]; then
+    if [[ -n "${CIVITAIKEY:-${CIVITAI_API_KEY:-}}" ]]; then
+      auth_args=(--header="Authorization: Bearer ${CIVITAIKEY:-${CIVITAI_API_KEY:-}}")
+    fi
+  fi
   if command -v aria2c >/dev/null 2>&1; then
     aria2c \
+      "${auth_args[@]}" \
       --allow-overwrite=true \
       --auto-file-renaming=false \
       --check-certificate=true \
@@ -50,10 +63,15 @@ download_model() {
       --summary-interval=10 \
       "${url}"
   else
-    curl --fail --location --retry 8 --retry-all-errors \
+    curl --fail --location --retry 8 --retry-all-errors "${auth_args[@]}" \
       --continue-at - --output "${partial}" "${url}"
   fi
-  echo "${sha256}  ${partial}" | sha256sum --check
+  actual_hash="$(sha256sum "${partial}" | cut -d ' ' -f 1)"
+  if [[ ",${sha256}," != *",${actual_hash},"* ]]; then
+    echo "Checksum mismatch for ${partial}: ${actual_hash}" >&2
+    return 1
+  fi
+  echo "Verified SHA-256: ${actual_hash}"
   mv "${partial}" "${destination}"
 }
 
@@ -93,7 +111,9 @@ else
   echo "Downloader: curl (install aria2 for multi-connection downloads)"
 fi
 echo "Downloading up to ${max_parallel} model files concurrently"
+echo "Model profile: ${model_profile}"
 
+if [[ "${model_profile}" == "turbo" ]]; then
 queue_download "diffusion_models/MiniMaxH3" \
   "DasiwaMinimaxH3_dasiwaHybrid8turboV1.safetensors" \
   "e0441d26414f6e0c28f43d580e6cc56fad424da0fa4d261b698ca73188aa6332" \
@@ -123,6 +143,28 @@ queue_download "vae/MiniMaxH3" \
   "minimax_h3_video_vae_int8_convrot.safetensors" \
   "9bb2d96f218c76babd85e0611b85ca8fb330a90546c01a0005e8a58a59593410" \
   "https://huggingface.co/Kijai/MiniMax-H3-experimental/resolve/main/minimax_h3_video_vae_int8_convrot.safetensors?download=true"
+else
+# Resolve the CivitAI source before starting the much larger HF downloads.
+download_model "diffusion_models/MiniMaxH3" \
+  "DasiwaMinimaxH3_dasiwaHybridV2_int8.safetensors" \
+  "dc1c77de0435901cb07dc6736493317f059a53fbdd2d363d1710cebfbb2844e7,4cb8e1eaa9c3e5c664822760890bcbe6078455401cfa43205baf322e856d25f8" \
+  "https://civitai.com/api/download/models/3314675?format=SafeTensor&fp=int8&type=Model"
+
+queue_download "diffusion_models/MiniMaxH3" \
+  "minimax_h3_fl2va_int8_convrot.safetensors" \
+  "7ad4c73e6e378b822ffd1629f27f632d3787d95f5e468e3af958f98c58df96a5" \
+  "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_fl2va_int8_convrot.safetensors?download=true"
+
+queue_download "text_encoders" \
+  "qwen3vl_32b_minimax_h3_bf16.safetensors" \
+  "600d567f6a9629c8574e8e7041b199bdd9c59a986afa7906910a81919610607d" \
+  "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors?download=true"
+
+queue_download "latent_upscale_models" \
+  "minimax_h3_latent_upscaler_3d_bf16.safetensors" \
+  "4f57821f5837f32f7142b67d815606dbd7550f194e5c769f7d6c3f83b146a5e6" \
+  "https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler/resolve/09592c6221ec95cc8e0fae67842e34926c4e668b/minimax_h3_latent_upscaler_3d_bf16.safetensors?download=true"
+fi
 
 queue_download "vae/MiniMaxH3" \
   "minimax_h3_audio_vae_fp32.safetensors" \
