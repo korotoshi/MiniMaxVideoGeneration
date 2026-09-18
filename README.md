@@ -99,9 +99,8 @@ is kept if it already exists so reruns do not overwrite your edits.
 The latent 2x stage remains optional and may need its spatial-split settings
 refreshed if the installed node version rejects the old workflow values.
 
-The CivitAI V2 listing has two same-named INT8 uploads with different hashes;
-the downloader accepts only those two published hashes, and reports which one
-was received. A checksum mismatch stops the setup.
+The CivitAI V2 download is pinned to INT8 file ID `3203130` and its published
+SHA-256 hash. A checksum mismatch stops the setup.
 
 ## Turbo-profile models (`MODEL_PROFILE=turbo`)
 

@@ -147,8 +147,8 @@ else
 # Resolve the CivitAI source before starting the much larger HF downloads.
 download_model "diffusion_models/MiniMaxH3" \
   "DasiwaMinimaxH3_dasiwaHybridV2_int8.safetensors" \
-  "dc1c77de0435901cb07dc6736493317f059a53fbdd2d363d1710cebfbb2844e7,4cb8e1eaa9c3e5c664822760890bcbe6078455401cfa43205baf322e856d25f8" \
-  "https://civitai.com/api/download/models/3314675?format=SafeTensor&fp=int8&type=Model"
+  "4cb8e1eaa9c3e5c664822760890bcbe6078455401cfa43205baf322e856d25f8" \
+  "https://civitai.com/api/download/models/3314675?fileId=3203130"
 
 queue_download "diffusion_models/MiniMaxH3" \
   "minimax_h3_fl2va_int8_convrot.safetensors" \
