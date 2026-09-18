@@ -31,7 +31,7 @@ if [[ ! -w "${workflow_dir}" ]]; then
   sudo chown "$(id -u):$(id -g)" "${workflow_dir}"
 fi
 python3 "${repo_root}/scripts/make-quality-workflow.py" \
-  "${repo_root}/DasiwaMinimaxH3WorkflowsT2VA_cMMH3V19.json" \
-  "${workflow_dir}/MiniMax-H3-Quality.json"
+  "${repo_root}/DasiwaMinimaxH3WorkflowsT2VA_cMMH3V22.json" \
+  "${workflow_dir}/MiniMax-H3-Quality-V22.json"
 
-echo "Quality VM setup complete. Restart ComfyUI, then open MiniMax-H3-Quality."
+echo "Quality VM setup complete. Restart ComfyUI, then open MiniMax-H3-Quality-V22."

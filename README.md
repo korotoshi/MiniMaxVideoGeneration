@@ -47,7 +47,7 @@ either download command. The two profiles can coexist on a volume.
 
 For a fresh or existing Massed Compute VM, this **single command** clones or
 updates this repository and performs the entire quality setup, including a
-separate `MiniMax-H3-Quality` workflow in ComfyUI:
+separate `MiniMax-H3-Quality-V22` workflow in ComfyUI:
 
 ```bash
 bash -lc 'repo="$HOME/MiniMaxVideoGeneration"; if [ -d "$repo/.git" ]; then git -C "$repo" pull --ff-only; else git clone https://github.com/korotoshi/MiniMaxVideoGeneration.git "$repo"; fi && bash "$repo/scripts/bootstrap-vm.sh" "$HOME/apps/ComfyUI"'
@@ -92,7 +92,7 @@ The included JSON is the editable UI workflow. Load it in ComfyUI and choose
 - MiniMax H3 3D BF16 latent upscaler (691 MB)
 - MiniMax H3 TAE preview model and RIFE 4.26 interpolation
 
-`bootstrap-vm.sh` creates a separate quality workflow with those exact files,
+`bootstrap-vm.sh` creates a separate V22-based quality workflow with those exact files,
 `res_multistep` / `simple`, 25 steps, and video/audio shifts of 10 / 3. The
 bundled original workflow retains its turbo defaults. The generated workflow
 is kept if it already exists so reruns do not overwrite your edits.

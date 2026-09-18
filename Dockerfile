@@ -15,7 +15,7 @@ RUN comfy-node-install \
 # Keep the editable UI workflow in the image for reference. Serverless API jobs
 # still submit an API-format workflow in input.workflow.
 RUN mkdir -p /comfyui/user/default/workflows
-COPY DasiwaMinimaxH3WorkflowsT2VA_cMMH3V19.json /comfyui/user/default/workflows/
+COPY DasiwaMinimaxH3WorkflowsT2VA_cMMH3V22.json /comfyui/user/default/workflows/
 
 # Model weights are stored on an attached Runpod Network Volume. The official
 # base worker automatically scans /runpod-volume/models at runtime.
