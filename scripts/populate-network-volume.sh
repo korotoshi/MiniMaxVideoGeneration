@@ -38,15 +38,28 @@ download_model() {
   fi
 
   echo "Downloading ${filename}"
-  local auth_args=()
+  local download_url="${url}"
   if [[ "${url}" == https://civitai.com/* || "${url}" == https://civitai.red/* ]]; then
-    if [[ -n "${CIVITAIKEY:-${CIVITAI_API_KEY:-}}" ]]; then
-      auth_args=(--header="Authorization: Bearer ${CIVITAIKEY:-${CIVITAI_API_KEY:-}}")
+    local civitai_token="${CIVITAIKEY:-${CIVITAI_API_KEY:-}}"
+    if [[ -z "${civitai_token}" ]]; then
+      echo "CIVITAIKEY is missing; add it to ~/.env on the VM" >&2
+      return 1
+    fi
+    # CivitAI redirects to an R2 presigned URL. Do not forward the CivitAI
+    # Bearer header to R2: its query signature is a separate auth mechanism.
+    if ! download_url="$(curl --fail --silent --show-error \
+      --max-filesize 1048576 --output /dev/null --write-out '%{redirect_url}' \
+      --header "Authorization: Bearer ${civitai_token}" "${url}")"; then
+      echo "Could not resolve CivitAI download for ${filename}" >&2
+      return 1
+    fi
+    if [[ "${download_url}" != https://*.r2.cloudflarestorage.com/* ]]; then
+      echo "CivitAI returned an unexpected download destination" >&2
+      return 1
     fi
   fi
   if command -v aria2c >/dev/null 2>&1; then
     aria2c \
-      "${auth_args[@]}" \
       --allow-overwrite=true \
       --auto-file-renaming=false \
       --check-certificate=true \
@@ -61,10 +74,10 @@ download_model() {
       --retry-wait=3 \
       --split="${ARIA2_CONNECTIONS:-8}" \
       --summary-interval=10 \
-      "${url}"
+      "${download_url}"
   else
-    curl --fail --location --retry 8 --retry-all-errors "${auth_args[@]}" \
-      --continue-at - --output "${partial}" "${url}"
+    curl --fail --location --retry 8 --retry-all-errors \
+      --continue-at - --output "${partial}" "${download_url}"
   fi
   actual_hash="$(sha256sum "${partial}" | cut -d ' ' -f 1)"
   if [[ ",${sha256}," != *",${actual_hash},"* ]]; then
