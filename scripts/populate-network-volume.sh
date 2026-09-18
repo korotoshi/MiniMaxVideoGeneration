@@ -20,6 +20,11 @@ if [[ ! -d "${volume_root}" ]]; then
   exit 1
 fi
 
+if [[ "${REINSTALL_MODELS:-0}" == "1" ]]; then
+  model_backup_dir="$(mktemp -d "${HOME}/comfyui-model-backup.XXXXXX")"
+  echo "Backing up existing selected models to ${model_backup_dir}"
+fi
+
 download_model() {
   local relative_path="$1"
   local filename="$2"
@@ -30,6 +35,12 @@ download_model() {
   local actual_hash
 
   mkdir -p "$(dirname "${destination}")"
+
+  if [[ "${REINSTALL_MODELS:-0}" == "1" && -f "${destination}" ]]; then
+    mkdir -p "${model_backup_dir}/${relative_path}"
+    mv "${destination}" "${model_backup_dir}/${relative_path}/${filename}"
+    echo "Backed up ${filename}"
+  fi
 
   if [[ -f "${destination}" ]] && \
      [[ ",${sha256}," == *",$(sha256sum "${destination}" | cut -d ' ' -f 1),"* ]]; then

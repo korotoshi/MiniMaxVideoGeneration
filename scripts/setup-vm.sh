@@ -44,10 +44,20 @@ else
 fi
 echo "Installing custom-node dependencies with ${comfy_python} ($("${comfy_python}" --version 2>&1))"
 
+if [[ "${REINSTALL_CUSTOM_NODES:-0}" == "1" ]]; then
+  node_backup_dir="$(mktemp -d "${HOME}/comfyui-custom-nodes-backup.XXXXXX")"
+  echo "Backing up existing custom nodes to ${node_backup_dir}"
+fi
+
 install_node() {
   local repo_url="$1"
   local directory="$2"
   local destination="${comfy_root}/custom_nodes/${directory}"
+
+  if [[ "${REINSTALL_CUSTOM_NODES:-0}" == "1" && -e "${destination}" ]]; then
+    echo "Backing up ${directory}"
+    mv "${destination}" "${node_backup_dir}/${directory}"
+  fi
 
   if [[ -d "${destination}/.git" ]]; then
     echo "Updating ${directory}"
@@ -91,7 +101,11 @@ install_node "https://github.com/PlagueKind/ComfyUI-PlagueKind-Nodes.git" \
 install_node "https://github.com/city96/ComfyUI-GGUF.git" \
   "ComfyUI-GGUF"
 
-bash "${script_dir}/populate-network-volume.sh" "${comfy_root}"
+if [[ "${SKIP_MODEL_DOWNLOADS:-0}" == "1" ]]; then
+  echo "Skipping model downloads and checks"
+else
+  bash "${script_dir}/populate-network-volume.sh" "${comfy_root}"
+fi
 
 echo
 echo "VM setup complete. Restart ComfyUI before loading the workflow."
