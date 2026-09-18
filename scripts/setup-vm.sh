@@ -44,19 +44,14 @@ else
 fi
 echo "Installing custom-node dependencies with ${comfy_python} ($("${comfy_python}" --version 2>&1))"
 
-if [[ "${REINSTALL_CUSTOM_NODES:-0}" == "1" ]]; then
-  node_backup_dir="$(mktemp -d "${HOME}/comfyui-custom-nodes-backup.XXXXXX")"
-  echo "Backing up existing custom nodes to ${node_backup_dir}"
-fi
-
 install_node() {
   local repo_url="$1"
   local directory="$2"
   local destination="${comfy_root}/custom_nodes/${directory}"
 
   if [[ "${REINSTALL_CUSTOM_NODES:-0}" == "1" && -e "${destination}" ]]; then
-    echo "Backing up ${directory}"
-    mv "${destination}" "${node_backup_dir}/${directory}"
+    echo "Removing existing ${directory} for a fresh clone"
+    rm -rf -- "${destination}"
   fi
 
   if [[ -d "${destination}/.git" ]]; then
