@@ -174,9 +174,9 @@ queue_download "text_encoders" \
   "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors?download=true"
 
 queue_download "latent_upscale_models" \
-  "minimax_h3_latent_upscaler_3d_bf16.safetensors" \
+  "minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors" \
   "4f57821f5837f32f7142b67d815606dbd7550f194e5c769f7d6c3f83b146a5e6" \
-  "https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler/resolve/09592c6221ec95cc8e0fae67842e34926c4e668b/minimax_h3_latent_upscaler_3d_bf16.safetensors?download=true"
+  "https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler/resolve/main/minimax_h3_latent_upscaler_3d_conv_v1/minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors?download=true"
 fi
 
 queue_download "vae/MiniMaxH3" \
