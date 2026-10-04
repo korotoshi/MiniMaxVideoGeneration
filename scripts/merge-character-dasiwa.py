@@ -146,12 +146,78 @@ def main() -> None:
     connect(460, 1, combine_id, 1, "AUDIO")
     connect(460, 2, combine_id, 3, "FLOAT")
 
-    # Replace the old decode group with one compact, numbered left-to-right quality lane.
-    for group in workflow.get("groups", []):
-        if group.get("title") == "Decoding and create video":
-            group["title"] = "LATENT UPSCALE ×2 · DECODE · DASiWA EXPORT"
-            group["bounding"] = [255, 6255, 1965, 735]
-            group["color"] = "#3f789e"
+    # Organize the complete canvas into a compact, numbered left-to-right workflow.
+    layout = {
+        # Source video, timing, resolution and replacement image.
+        459: ((0, 0), "01A · Load source video"),
+        480: ((0, 335), "01B · Duration seconds"),
+        483: ((270, 0), "01C · Trim source video"),
+        460: ((570, 0), "01D · Video frames + original audio"),
+        924: ((570, 145), "01E · Working resolution MP"),
+        923: ((860, 0), "01F · Scale source frames"),
+        925: ((1110, 0), "01G · Read working dimensions"),
+        496: ((0, 465), "01H · Load replacement character"),
+        # SAM mask and source-video preparation.
+        456: ((1370, 0), "02A · Scale frames for SAM"),
+        910: ((1680, 0), "02B · SAM3 subject tracking"),
+        491: ((2045, 0), "02C · Mask preview conversion"),
+        492: ((2310, 0), "02D · Preview tracked mask"),
+        912: ((2045, 105), "02E · Invert source frames"),
+        454: ((2310, 330), "02F · Composite masked reference video"),
+        461: ((2610, 300), "02G · Preview H3 video reference"),
+        # Qwen analysis and final prompt assembly.
+        922: ((0, 850), "03A · Character-analysis instructions"),
+        916: ((500, 850), "03B · Qwen character analysis"),
+        509: ((0, 1300), "03C · Optional action hint"),
+        920: ((300, 1190), "03D · Video-analysis instructions"),
+        921: ((820, 1190), "03E · Qwen source-video analysis"),
+        917: ((1090, 880), "03F · Assemble final H3 prompt"),
+        918: ((1400, 850), "03G · Review final prompt before queue"),
+        # H3 models and optional acceleration.
+        463: ((0, 1730), "04A · H3 Ref2VA model"),
+        465: ((0, 1850), "04B · H3 text encoder"),
+        470: ((0, 2000), "04C · H3 video VAE"),
+        474: ((0, 2100), "04D · H3 audio VAE"),
+        502: ((0, 2210), "04E · Optional Turbo LoRA"),
+        503: ((270, 2210), "04F · Optional attention acceleration"),
+        # Ref2VA conditioning and base sampling.
+        464: ((700, 1730), "05A · H3 character replacement conditioning"),
+        467: ((1140, 1730), "05B · Seed / noise"),
+        466: ((1140, 1840), "05C · Guider"),
+        468: ((1140, 1930), "05D · Sampler"),
+        473: ((1140, 2030), "05E · Base scheduler"),
+        469: ((1540, 1730), "05F · Generate replacement latent"),
+        # Latent quality lane and export.
+        width_x2: ((1810, 1730), "06A · Output width ×2"),
+        height_x2: ((1810, 1935), "06B · Output height ×2"),
+        latent_params: ((2250, 1730), "06C · H3 latent upscaler model"),
+        latent_scheduler: ((2250, 1940), "06D · One-step refinement"),
+        temporal_params: ((2660, 1730), "06E · Temporal split"),
+        spatial_params: ((2660, 1890), "06F · Spatial tiles"),
+        latent_upscale: ((3010, 1730), "06G · H3 latent upscale ×2"),
+        latent_switch: ((3010, 2260), "ENABLE / DISABLE LATENT UPSCALE ×2"),
+        472: ((3370, 1730), "06H · Decode final frames"),
+        combine_id: ((3650, 1730), "06I · DaSiWa export · original audio"),
+    }
+    for node_id, (position, title) in layout.items():
+        if node_id in nodes:
+            nodes[node_id]["pos"] = list(position)
+            nodes[node_id]["title"] = title
+
+    # Remove the old unconnected test-links note; it obscures the useful controls.
+    workflow["nodes"] = [node for node in workflow["nodes"] if node["id"] != 500]
+    nodes.pop(500, None)
+
+    workflow["groups"] = [
+        {"id": 1, "title": "01 · INPUTS — SOURCE VIDEO, TIMING, CHARACTER", "bounding": [-35, -55, 1325, 825], "color": "#315c78", "flags": {}},
+        {"id": 2, "title": "02 · SAM3 — TRACK SUBJECT AND BUILD VIDEO REFERENCE", "bounding": [1335, -55, 1575, 825], "color": "#466b4f", "flags": {}},
+        {"id": 3, "title": "03 · QWEN — ANALYZE CHARACTER + ACTION, THEN REVIEW PROMPT", "bounding": [-35, 795, 2055, 815], "color": "#705b38", "flags": {}},
+        {"id": 4, "title": "04 · MODELS — H3 LOADERS + OPTIONAL ACCELERATION", "bounding": [-35, 1675, 690, 1025], "color": "#59466d", "flags": {}},
+        {"id": 5, "title": "05 · MINIMAX H3 — REF2VA CONDITIONING + BASE GENERATION", "bounding": [665, 1675, 1135, 1025], "color": "#3f789e", "flags": {}},
+        {"id": 6, "title": "06 · DASiWA QUALITY — LATENT 2×, DECODE, ORIGINAL-AUDIO EXPORT", "bounding": [1775, 1675, 2505, 1255], "color": "#7b4f32", "flags": {}},
+    ]
+    workflow.setdefault("extra", {}).setdefault("ds", {})
+    workflow["extra"]["ds"] = {"scale": 0.42, "offset": [80, 80]}
 
     workflow["last_node_id"] = max(node["id"] for node in workflow["nodes"])
     workflow["last_link_id"] = max(link[0] for link in workflow["links"])
