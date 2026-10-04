@@ -34,4 +34,10 @@ python3 "${repo_root}/scripts/make-quality-workflow.py" \
   "${repo_root}/DasiwaMinimaxH3WorkflowsT2VA_cMMH3V26.json" \
   "${workflow_dir}/MiniMax-H3-Quality-V26-V3.json"
 
-echo "Quality VM setup complete. Restart ComfyUI, then open MiniMax-H3-Quality-V26-V3."
+if [[ ! -e "${workflow_dir}/MiniMax-H3-Character-DaSiWa-Quality.json" ]]; then
+  install -m 0644 \
+    "${repo_root}/minimaxH3Character_v30_DaSiWa_Quality.json" \
+    "${workflow_dir}/MiniMax-H3-Character-DaSiWa-Quality.json"
+fi
+
+echo "Quality VM setup complete. Restart ComfyUI, then open MiniMax-H3-Character-DaSiWa-Quality."

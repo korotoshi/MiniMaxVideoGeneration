@@ -46,8 +46,9 @@ To restore the previous fast setup instead, use `MODEL_PROFILE=turbo` before
 either download command. The two profiles can coexist on a volume.
 
 For a fresh or existing Massed Compute VM, this **single command** clones or
-updates this repository and performs the entire quality setup, including a
-separate `MiniMax-H3-Quality-V26-V3` workflow in ComfyUI:
+updates this repository and performs the entire quality setup, including the
+`MiniMax-H3-Quality-V26-V3` and `MiniMax-H3-Character-DaSiWa-Quality`
+workflows in ComfyUI:
 
 ```bash
 bash -lc 'repo="$HOME/MiniMaxVideoGeneration"; if [ -d "$repo/.git" ]; then git -C "$repo" pull --ff-only; else git clone https://github.com/korotoshi/MiniMaxVideoGeneration.git "$repo"; fi && bash "$repo/scripts/bootstrap-vm.sh" "$HOME/apps/ComfyUI"'
@@ -92,6 +93,7 @@ The included JSON is the editable UI workflow. Load it in ComfyUI and choose
 - MiniMax H3 video VAE FP16 and audio VAE FP32
 - MiniMax H3 3D BF16 latent upscaler (691 MB)
 - MiniMax H3 TAE preview model and RIFE 4.26 interpolation
+- SAM 3.1 multiplex FP16 and AnimeSharpV4 RCAN 2x upscaler
 
 `bootstrap-vm.sh` creates a separate V26-based quality workflow with those exact files,
 `res_multistep` / `simple`, 25 steps, and video/audio shifts of 10 / 3. The
@@ -116,8 +118,18 @@ stops the setup.
 - MiniMax H3 TAE preview model
 - RIFE 4.26 interpolation
 
-URLs and SHA-256 values are recorded in `model-sources.json`. The AnimeSharp
-upscaler weight is not installed; keep that stage disabled unless you add it.
+URLs and SHA-256 values are recorded in `model-sources.json`.
+
+## Character replacement + DaSiWa quality workflow
+
+`MiniMax-H3-Character-DaSiWa-Quality` combines the SAM/Qwen character-mask
+workflow with optional H3 latent 2x, RIFE 2x interpolation, simple 2x,
+AnimeSharp model 2x, RTX refinement, and DaSiWa Enhanced Video Combine. All
+expensive post-processing stages are disabled by default. Enable only one
+spatial 2x route at a time (`simple`, `model`, `RTX`, or latent) unless a larger
+than 2x output is intentional. Final export uses the untouched source-video
+audio. The two Qwen analysis nodes default to non-FP8 8B + SDPA to avoid the
+remote FP8-kernel trust failure.
 
 Runpod's GitHub builder limits Docker builds to 30 minutes and images to 80 GB.
 Keeping model weights on the volume avoids both limits.

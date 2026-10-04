@@ -95,6 +95,8 @@ install_node "https://github.com/PlagueKind/ComfyUI-PlagueKind-Nodes.git" \
   "ComfyUI-PlagueKind-Nodes"
 install_node "https://github.com/city96/ComfyUI-GGUF.git" \
   "ComfyUI-GGUF"
+install_node "https://github.com/1038lab/ComfyUI-QwenVL.git" \
+  "ComfyUI-QwenVL"
 
 if [[ "${SKIP_MODEL_DOWNLOADS:-0}" == "1" ]]; then
   echo "Skipping model downloads and checks"
