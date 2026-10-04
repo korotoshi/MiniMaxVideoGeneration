@@ -24,7 +24,7 @@ def main() -> None:
     templates = {node["id"]: node for node in template_subgraph["nodes"]}
 
     # The original basic video writers are superseded by DaSiWa Enhanced Video Combine.
-    remove_nodes = {475, 476, 482}
+    remove_nodes = {471, 475, 476, 482}
     workflow["nodes"] = [node for node in workflow["nodes"] if node["id"] not in remove_nodes]
     workflow["links"] = [
         link for link in workflow["links"] if link[1] not in remove_nodes and link[3] not in remove_nodes
@@ -80,14 +80,14 @@ def main() -> None:
         return link_id
 
     # Optional H3 latent 2x upscale before VAE decoding.
-    width_x2 = clone(2775, (100, 7020), "Latent upscale width ×2")
-    height_x2 = clone(2776, (100, 7200), "Latent upscale height ×2")
-    latent_params = clone(2768, (390, 7000), "H3 latent upscaler model")
-    latent_scheduler = clone(2777, (390, 7190), "H3 latent upscale scheduler")
-    temporal_params = clone(2774, (700, 7000), "H3 temporal split")
-    spatial_params = clone(2773, (700, 7160), "H3 spatial split")
-    latent_upscale = clone(2769, (1050, 6990), "Optional H3 latent upscale ×2")
-    latent_switch = clone(2749, (1050, 7350), "Enable H3 latent upscale ×2")
+    width_x2 = clone(2775, (300, 6350), "01 · Output width ×2")
+    height_x2 = clone(2776, (300, 6540), "02 · Output height ×2")
+    latent_params = clone(2768, (590, 6350), "03 · H3 latent upscaler model")
+    latent_scheduler = clone(2777, (590, 6560), "04 · One-step latent refinement")
+    temporal_params = clone(2774, (900, 6350), "05 · Temporal split")
+    spatial_params = clone(2773, (900, 6510), "06 · Spatial tiles")
+    latent_upscale = clone(2769, (1230, 6350), "07 · H3 latent upscale ×2")
+    latent_switch = clone(2749, (1230, 6750), "ENABLE LATENT UPSCALE ×2")
     # Use the model filename downloaded by this repository.
     nodes[latent_params]["widgets_values"][0] = "minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors"
 
@@ -114,8 +114,8 @@ def main() -> None:
     connect(temporal_params, 0, latent_switch, 7, "H3_TEMPORAL_PARAM")
     connect(width_x2, 1, latent_switch, 8, "INT")
     connect(height_x2, 1, latent_switch, 9, "INT")
-    # Replace the direct sampler-to-video-decode link. Audio remains decoded from the base latent,
-    # while final export intentionally uses the untouched source audio.
+    # Replace the direct sampler-to-video-decode link. Final export intentionally uses the
+    # untouched source audio, so the generated audio decoder is unnecessary.
     old_video_decode_link = nodes[472]["inputs"][0].get("link")
     if old_video_decode_link is not None:
         workflow["links"] = [link for link in workflow["links"] if link[0] != old_video_decode_link]
@@ -124,26 +124,13 @@ def main() -> None:
     nodes[472]["inputs"][0]["link"] = None
     connect(latent_upscale, 0, 472, 0, "LATENT")
 
-    # DaSiWa post-decode quality chain. Every expensive stage is bypassed by default.
-    interp_model = clone(2714, (390, 7650), "RIFE interpolation model")
-    interpolate = clone(2715, (700, 7650), "Optional RIFE ×2 interpolation")
-    fps_x2 = clone(2717, (700, 7870), "Output FPS ×2 when interpolating")
-    interp_switch = clone(2716, (700, 8040), "Enable RIFE interpolation")
-    simple_upscale = clone(2546, (1050, 7650), "Optional simple 2× upscale")
-    simple_switch = clone(2448, (1050, 8010), "Enable simple 2× upscale")
-    upscale_loader = clone(2079, (1360, 7650), "2× upscale model")
-    model_upscale = clone(2537, (1360, 7780), "Optional model 2× upscale")
-    model_switch = clone(2449, (1360, 8010), "Enable model 2× upscale")
-    rtx_upscale = clone(2528, (1700, 7650), "Optional DaSiWa RTX upscaler/refiner")
-    rtx_switch = clone(2450, (1700, 8010), "Enable RTX upscaler/refiner")
-
     # DaSiWa EnhancedVideoCombine is a top-level node, not part of the Settings subgraph.
     combine_template = next(node for node in template["nodes"] if node["type"] == "DaSiWa_EnhancedVideoCombine")
     combine = copy.deepcopy(combine_template)
     combine["id"] = next_node_id
     next_node_id += 1
-    combine["pos"] = [2080, 7650]
-    combine["title"] = "DaSiWa final video — original source audio"
+    combine["pos"] = [1920, 6370]
+    combine["title"] = "09 · DaSiWa export · original source audio"
     for inp in combine.get("inputs", []):
         inp["link"] = None
     for out in combine.get("outputs", []):
@@ -153,34 +140,18 @@ def main() -> None:
     nodes[combine["id"]] = combine
     combine_id = combine["id"]
 
-    connect(472, 0, interpolate, 1, "IMAGE")
-    connect(interp_model, 0, interpolate, 0, "INTERP_MODEL")
-    connect(460, 2, fps_x2, 0, "FLOAT,INT,BOOLEAN")
-    connect(interpolate, 0, simple_upscale, 0, "IMAGE")
-    connect(simple_upscale, 0, model_upscale, 1, "IMAGE")
-    connect(upscale_loader, 0, model_upscale, 0, "UPSCALE_MODEL")
-    connect(model_upscale, 0, rtx_upscale, 0, "IMAGE")
-    connect(rtx_upscale, 0, combine_id, 0, "IMAGE")
+    nodes[472]["pos"] = [1610, 6370]
+    nodes[472]["title"] = "08 · Decode final frames"
+    connect(472, 0, combine_id, 0, "IMAGE")
     connect(460, 1, combine_id, 1, "AUDIO")
-    connect(fps_x2, 0, combine_id, 3, "FLOAT")
+    connect(460, 2, combine_id, 3, "FLOAT")
 
-    connect(fps_x2, 0, interp_switch, 1, "FLOAT")
-    connect(interpolate, 0, interp_switch, 2, "IMAGE")
-    connect(interp_model, 0, interp_switch, 3, "INTERP_MODEL")
-    connect(simple_upscale, 0, simple_switch, 1, "IMAGE")
-    connect(model_upscale, 0, model_switch, 1, "IMAGE")
-    connect(upscale_loader, 0, model_switch, 2, "UPSCALE_MODEL")
-    connect(rtx_upscale, 0, rtx_switch, 1, "IMAGE")
-
-    workflow.setdefault("groups", []).append(
-        {
-            "id": max((g.get("id", 0) for g in workflow.get("groups", [])), default=0) + 1,
-            "title": "DaSiWa Quality Post-Processing — all optional stages disabled by default",
-            "bounding": [55, 6940, 2375, 1260],
-            "color": "#3f789e",
-            "flags": {},
-        }
-    )
+    # Replace the old decode group with one compact, numbered left-to-right quality lane.
+    for group in workflow.get("groups", []):
+        if group.get("title") == "Decoding and create video":
+            group["title"] = "LATENT UPSCALE ×2 · DECODE · DASiWA EXPORT"
+            group["bounding"] = [255, 6255, 1965, 735]
+            group["color"] = "#3f789e"
 
     workflow["last_node_id"] = max(node["id"] for node in workflow["nodes"])
     workflow["last_link_id"] = max(link[0] for link in workflow["links"])

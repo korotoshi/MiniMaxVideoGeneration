@@ -204,11 +204,6 @@ queue_download "frame_interpolation" \
   "151874592c877740e5db11522f4514df569eeafb0a0fcb2696f16e9e8d317c94" \
   "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/main/frame_interpolation/rife_v4.26.safetensors?download=true"
 
-queue_download "upscale_models" \
-  "2x-AnimeSharpV4_RCAN.safetensors" \
-  "6470bb91d6622d6acdff81132c1a8615b961b919ce2b9a01ce993378500cfbe1" \
-  "https://huggingface.co/Kutches/Anim4/resolve/main/2x-AnimeSharpV4_RCAN.safetensors"
-
 queue_download "checkpoints" \
   "sam3.1_multiplex_fp16.safetensors" \
   "9ba99c92703c2e8b4f47de2d34a539bb8e18923049e238b780d70dbe6368eb03" \

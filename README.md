@@ -93,7 +93,7 @@ The included JSON is the editable UI workflow. Load it in ComfyUI and choose
 - MiniMax H3 video VAE FP16 and audio VAE FP32
 - MiniMax H3 3D BF16 latent upscaler (691 MB)
 - MiniMax H3 TAE preview model and RIFE 4.26 interpolation
-- SAM 3.1 multiplex FP16 and AnimeSharpV4 RCAN 2x upscaler
+- SAM 3.1 multiplex FP16
 
 `bootstrap-vm.sh` creates a separate V26-based quality workflow with those exact files,
 `res_multistep` / `simple`, 25 steps, and video/audio shifts of 10 / 3. The
@@ -123,13 +123,12 @@ URLs and SHA-256 values are recorded in `model-sources.json`.
 ## Character replacement + DaSiWa quality workflow
 
 `MiniMax-H3-Character-DaSiWa-Quality` combines the SAM/Qwen character-mask
-workflow with optional H3 latent 2x, RIFE 2x interpolation, simple 2x,
-AnimeSharp model 2x, RTX refinement, and DaSiWa Enhanced Video Combine. All
-expensive post-processing stages are disabled by default. Enable only one
-spatial 2x route at a time (`simple`, `model`, `RTX`, or latent) unless a larger
-than 2x output is intentional. Final export uses the untouched source-video
-audio. The two Qwen analysis nodes default to non-FP8 8B + SDPA to avoid the
-remote FP8-kernel trust failure.
+workflow with the V26 DaSiWa H3 latent 2x pipeline and Enhanced Video Combine.
+The numbered quality lane is arranged left to right and the latent stage is
+disabled by default for inexpensive tests. Its model parameters, one-step
+refinement, temporal split, and spatial tiling match the V26 quality workflow.
+Final export uses the untouched source-video audio. The two Qwen analysis nodes
+default to non-FP8 8B + SDPA to avoid the remote FP8-kernel trust failure.
 
 Runpod's GitHub builder limits Docker builds to 30 minutes and images to 80 GB.
 Keeping model weights on the volume avoids both limits.

@@ -96,12 +96,6 @@
       "sha256": "151874592c877740e5db11522f4514df569eeafb0a0fcb2696f16e9e8d317c94"
     },
     {
-      "filename": "2x-AnimeSharpV4_RCAN.safetensors",
-      "path": "models/upscale_models",
-      "url": "https://huggingface.co/Kutches/Anim4/resolve/main/2x-AnimeSharpV4_RCAN.safetensors",
-      "sha256": "6470bb91d6622d6acdff81132c1a8615b961b919ce2b9a01ce993378500cfbe1"
-    },
-    {
       "filename": "sam3.1_multiplex_fp16.safetensors",
       "path": "models/checkpoints",
       "url": "https://huggingface.co/Comfy-Org/sam3.1/resolve/main/checkpoints/sam3.1_multiplex_fp16.safetensors",
