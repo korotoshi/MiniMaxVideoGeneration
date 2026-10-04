@@ -8,10 +8,17 @@
       "profile": "quality"
     },
     {
-      "filename": "DasiwaMinimaxH3_dasiwaHybridV2_int8.safetensors",
+      "filename": "DasiwaMinimaxH3_dasiwaHybridV3_3263052.safetensors",
       "path": "models/diffusion_models/MiniMaxH3",
-      "url": "https://civitai.com/api/download/models/3314675?fileId=3203130",
-      "sha256": "4cb8e1eaa9c3e5c664822760890bcbe6078455401cfa43205baf322e856d25f8",
+      "url": "https://civitai.com/api/download/models/3374445?fileId=3263052",
+      "sha256": "0ce4dfecce862b010823a5a74903543bd7f2ad21872272232f70f9a836d30e53",
+      "profile": "quality"
+    },
+    {
+      "filename": "DasiwaMinimaxH3_dasiwaHybridTurboV3_3263048.safetensors",
+      "path": "models/diffusion_models/MiniMaxH3",
+      "url": "https://civitai.com/api/download/models/3374439?fileId=3263048",
+      "sha256": "5da4bbf303f91b468010f504951e3959cd77420ec5f93ae007c9660b485f7df6",
       "profile": "quality"
     },
     {

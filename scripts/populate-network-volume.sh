@@ -159,9 +159,14 @@ queue_download "vae/MiniMaxH3" \
 else
 # Resolve the CivitAI source before starting the much larger HF downloads.
 download_model "diffusion_models/MiniMaxH3" \
-  "DasiwaMinimaxH3_dasiwaHybridV2_int8.safetensors" \
-  "4cb8e1eaa9c3e5c664822760890bcbe6078455401cfa43205baf322e856d25f8" \
-  "https://civitai.com/api/download/models/3314675?fileId=3203130"
+  "DasiwaMinimaxH3_dasiwaHybridV3_3263052.safetensors" \
+  "0ce4dfecce862b010823a5a74903543bd7f2ad21872272232f70f9a836d30e53" \
+  "https://civitai.com/api/download/models/3374445?fileId=3263052"
+
+queue_download "diffusion_models/MiniMaxH3" \
+  "DasiwaMinimaxH3_dasiwaHybridTurboV3_3263048.safetensors" \
+  "5da4bbf303f91b468010f504951e3959cd77420ec5f93ae007c9660b485f7df6" \
+  "https://civitai.com/api/download/models/3374439?fileId=3263048"
 
 queue_download "diffusion_models/MiniMaxH3" \
   "minimax_h3_fl2va_int8_convrot.safetensors" \

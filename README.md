@@ -47,7 +47,7 @@ either download command. The two profiles can coexist on a volume.
 
 For a fresh or existing Massed Compute VM, this **single command** clones or
 updates this repository and performs the entire quality setup, including a
-separate `MiniMax-H3-Quality-V26` workflow in ComfyUI:
+separate `MiniMax-H3-Quality-V26-V3` workflow in ComfyUI:
 
 ```bash
 bash -lc 'repo="$HOME/MiniMaxVideoGeneration"; if [ -d "$repo/.git" ]; then git -C "$repo" pull --ff-only; else git clone https://github.com/korotoshi/MiniMaxVideoGeneration.git "$repo"; fi && bash "$repo/scripts/bootstrap-vm.sh" "$HOME/apps/ComfyUI"'
@@ -86,7 +86,8 @@ The included JSON is the editable UI workflow. Load it in ComfyUI and choose
 ## Quality-profile models (default)
 
 - Original MiniMax H3 FL2VA full INT8 ConvRot (34 GB)
-- DaSiWa Hybrid V2 non-turbo INT8 (19.53 GB; CivitAI)
+- DaSiWa Hybrid V3 non-turbo INT8 (19.53 GB; CivitAI)
+- DaSiWa Hybrid Turbo V3 INT8 (19.53 GB; CivitAI)
 - Qwen3-VL 32B MiniMax H3 BF16 (51.5 GB)
 - MiniMax H3 video VAE FP16 and audio VAE FP32
 - MiniMax H3 3D BF16 latent upscaler (691 MB)
@@ -99,8 +100,9 @@ is kept if it already exists so reruns do not overwrite your edits.
 The latent 2x stage remains optional and may need its spatial-split settings
 refreshed if the installed node version rejects the old workflow values.
 
-The CivitAI V2 download is pinned to INT8 file ID `3203130` and its published
-SHA-256 hash. A checksum mismatch stops the setup.
+The CivitAI V3 downloads are pinned to INT8 file IDs `3263052` (quality) and
+`3263048` (turbo), with their published SHA-256 hashes. A checksum mismatch
+stops the setup.
 
 ## Turbo-profile models (`MODEL_PROFILE=turbo`)
 

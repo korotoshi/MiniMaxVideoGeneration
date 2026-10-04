@@ -17,7 +17,7 @@ updates = {
     "shift_video": (3, 10),
     "shift_audio": (4, 3),
     "unet_name": (17, "MiniMaxH3/minimax_h3_fl2va_int8_convrot.safetensors"),
-    "unet_name_1": (18, "MiniMaxH3/DasiwaMinimaxH3_dasiwaHybridV2_int8.safetensors"),
+    "unet_name_1": (18, "MiniMaxH3/DasiwaMinimaxH3_dasiwaHybridV3_3263052.safetensors"),
     "clip_name": (19, "qwen3vl_32b_minimax_h3_bf16.safetensors"),
     "vae_name": (20, "MiniMaxH3/minimax_h3_video_vae_fp16.safetensors"),
 }

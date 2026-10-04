@@ -32,6 +32,6 @@ if [[ ! -w "${workflow_dir}" ]]; then
 fi
 python3 "${repo_root}/scripts/make-quality-workflow.py" \
   "${repo_root}/DasiwaMinimaxH3WorkflowsT2VA_cMMH3V26.json" \
-  "${workflow_dir}/MiniMax-H3-Quality-V26.json"
+  "${workflow_dir}/MiniMax-H3-Quality-V26-V3.json"
 
-echo "Quality VM setup complete. Restart ComfyUI, then open MiniMax-H3-Quality-V26."
+echo "Quality VM setup complete. Restart ComfyUI, then open MiniMax-H3-Quality-V26-V3."
